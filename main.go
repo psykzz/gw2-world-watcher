@@ -43,6 +43,46 @@ func getWorldsJson(url string) (worlds []World, err error) {
 	}
 	return
 }
+type Payload struct {
+	Notification struct {
+		Title       string `json:"title"`
+		Body        string `json:"body"`
+		Icon        string `json:"icon"`
+		ClickAction string `json:"click_action"`
+	} `json:"notification"`
+	To string `json:"to"`
+}
+func sendNotification() {
+	
+	// TODO: Fill out the rest of this payload.
+	data := Payload{
+		notification: Notification{
+			Title: "GW2 Watcher" 
+			Body: "Server change status!" 
+		}
+		To: ""
+	}
+	
+	payloadBytes, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Unable to marshall notification JSON");
+	}
+	body := bytes.NewReader(payloadBytes)
+
+	req, err := http.NewRequest("POST", "https://fcm.googleapis.com/fcm/send", body)
+	if err != nil {
+		fmt.Println("Unable to create message for FCM")
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("key=%s", os.GetEnv('FCM_SERVER_KEY')))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("Unable to send message to FCM")
+	}
+	defer resp.Body.Close()
+
+}
 
 func main() {
 	token := os.Getenv("PUSHBULLET_TOKEN")
